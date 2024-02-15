@@ -5,11 +5,13 @@ import jakarta.annotation.Resource;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.example.backend.Fileter.JwtAuthorizeFilter;
 import org.example.backend.entity.ResultBean;
 import org.example.backend.entity.vo.response.AuthorizeVO;
 import org.example.backend.utils.JwtUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -17,9 +19,12 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -33,7 +38,8 @@ public class SecurityConfiguration {
     @Resource
     JwtUtils jwtUtils;
 
-
+    @Resource
+    JwtAuthorizeFilter jwtAuthorizeFilter;
     @Bean
     SecurityFilterChain filterChain(HttpSecurity security) throws Exception {
         return security
@@ -71,6 +77,29 @@ public class SecurityConfiguration {
                 })
                 //无状态
                 .sessionManagement(conf->conf.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                //添加过滤器
+                .addFilterBefore(jwtAuthorizeFilter, UsernamePasswordAuthenticationFilter.class)
+                //未登录
+                .exceptionHandling(conf->{
+                    //没有登录
+                    conf.authenticationEntryPoint(new AuthenticationEntryPoint() {
+                        @Override
+                        public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
+                            response.setCharacterEncoding("UTF-8");
+                            response.setContentType("application/json");
+                            response.getWriter().write(ResultBean.failure(401, authException.getMessage()).asJOSNString());
+                        }
+                    });
+                    //角色无权限
+                    conf.accessDeniedHandler(new AccessDeniedHandler() {
+                        @Override
+                        public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
+                            response.setCharacterEncoding("UTF-8");
+                            response.setContentType("application/json");
+                            response.getWriter().write(ResultBean.failure(403, accessDeniedException.getMessage()).asJOSNString());
+                        }
+                    });
+                })
                 .build();
     }
     @Bean
@@ -87,7 +116,6 @@ public class SecurityConfiguration {
                 authorizeVO.setRole("");
                 authorizeVO.setUsername("");
                 authorizeVO.setToken(token);
-
                 response.getWriter().write(ResultBean.success(authorizeVO,"登录成功").asJOSNString());
             }
         };
