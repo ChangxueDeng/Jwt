@@ -6,3 +6,6 @@ spring:
       name: user
       roles: user
       password: 123456
+    jwt:
+      key: dcx
+      expire: 1
