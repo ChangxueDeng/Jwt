@@ -66,7 +66,7 @@ public class JwtUtils {
     //计算过期时间
     public Date expireTime(){
         Calendar calendar = Calendar.getInstance(); //获取实例
-//        calendar.add(Calendar.HOUR, expire);
+        calendar.add(Calendar.HOUR, expire);
         return calendar.getTime();
     }
     //创建jwt
@@ -103,9 +103,7 @@ public class JwtUtils {
     }
     //判断Token是否合法，并且获取token令牌
     private String convertToken(String headerToken){
-        System.out.println(headerToken);
-        System.out.println(headerToken.substring(7));
-        if(headerToken == null || !headerToken.startsWith("Bearer "))
+        if(headerToken == null || !headerToken.startsWith("Bearer"))
             return null;
         return headerToken.substring(7);
     }

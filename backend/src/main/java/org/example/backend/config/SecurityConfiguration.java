@@ -7,8 +7,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.example.backend.Fileter.JwtAuthorizeFilter;
 import org.example.backend.entity.ResultBean;
+import org.example.backend.entity.dto.Account;
 import org.example.backend.entity.vo.response.AuthorizeVO;
+import org.example.backend.service.AccountService;
+import org.example.backend.service.Impl.AccountServiceImpl;
 import org.example.backend.utils.JwtUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.AccessDeniedException;
@@ -35,6 +39,9 @@ import java.io.PrintWriter;
 @EnableWebSecurity
 @Configuration
 public class SecurityConfiguration {
+
+    @Resource
+    AccountService accountService;
 
     @Resource
     JwtUtils jwtUtils;
@@ -101,6 +108,7 @@ public class SecurityConfiguration {
                         }
                     });
                 })
+//                .userDetailsService(accountService)
                 .build();
     }
     @Bean
@@ -111,12 +119,15 @@ public class SecurityConfiguration {
                 response.setContentType("application/json");
                 response.setCharacterEncoding("UTF-8");
                 User user = (User) authentication.getPrincipal();
-                String token = jwtUtils.createJwt(user, 1, "张三");
-                AuthorizeVO authorizeVO = new AuthorizeVO();
-                authorizeVO.setExpire(jwtUtils.expireTime());
-                authorizeVO.setRole("");
-                authorizeVO.setUsername("");
-                authorizeVO.setToken(token);
+                Account account = accountService.findAccountByUsernameOrEmail(user.getUsername());
+                String token = jwtUtils.createJwt(user, account.getId(), account.getUsername());
+                //AuthorizeVO authorizeVO = new AuthorizeVO();
+                //BeanUtils.copyProperties(account,authorizeVO);
+                //通过反射
+                AuthorizeVO authorizeVO = account.asViewObject(AuthorizeVO.class, v ->{
+                    v.setExpire(jwtUtils.expireTime());
+                    v.setToken(token);
+                });
                 response.getWriter().write(ResultBean.success(authorizeVO,"登录成功").asJOSNString());
             }
         };
@@ -149,5 +160,4 @@ public class SecurityConfiguration {
             }
         };
     }
-
 }
