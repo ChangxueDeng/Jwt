@@ -30,6 +30,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 
 @EnableWebSecurity
 @Configuration
@@ -138,7 +139,13 @@ public class SecurityConfiguration {
             public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
                 response.setContentType("application/json");
                 response.setCharacterEncoding("UTF-8");
-                response.getWriter().write(ResultBean.success("退出登录成功").asJOSNString());
+                PrintWriter writer = response.getWriter();
+                String authorization = request.getHeader("Authorization");
+                if(jwtUtils.validateJwt(authorization)){
+                    writer.write(ResultBean.success("退出登陆成功").asJOSNString());
+                }else {
+                    writer.write(ResultBean.failure(400,"退出登录失败").asJOSNString());
+                }
             }
         };
     }

@@ -9,3 +9,7 @@ spring:
     jwt:
       key: dcx
       expire: 1
+  data:
+    redis:
+      host: 192.168.137.129
+      port: 6379
