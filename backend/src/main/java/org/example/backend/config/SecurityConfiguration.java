@@ -73,11 +73,11 @@ public class SecurityConfiguration {
                 .cors(conf->{
                     //新建corsConfiguration
                     CorsConfiguration configuration = new CorsConfiguration();
-                    configuration.addAllowedOrigin("localhost:5173");
+                    configuration.addAllowedOrigin("http://localhost:5173");
                     configuration.addAllowedMethod("*");
                     configuration.addAllowedHeader("*");
                     configuration.addExposedHeader("*");
-                    //configuration.setAllowCredentials(true);//发送cookie
+                    configuration.setAllowCredentials(false);//发送cookie
                     //创建source
                     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
                     source.registerCorsConfiguration("/**", configuration);

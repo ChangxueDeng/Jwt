@@ -2,8 +2,8 @@
 
 import {Link, Lock, User} from "@element-plus/icons-vue";
 import router from "@/router/index.js";
-import {reactive} from "vue";
-import {post} from "@/net/index.js";
+import {reactive, ref} from "vue";
+import {login, post} from "@/net/index.js";
 import  {ElMessage} from "element-plus";
 
 const form = reactive({
@@ -11,21 +11,39 @@ const form = reactive({
   password: '',
   remember: false
 })
-const login = ()=>{
-  if(!form.username || !form.password){
-   ElMessage.warning("请填写用户名和密码")
-  }else {
-    post("/api/auth/login",{
-      username: form.username,
-      password: form.password,
-      remember: form.remember,
-    }, (message)=>{
-        ElMessage.success(message)
-        router.push('/index')
-    }, (message)=>{
-      ElMessage.error(message)
-    })
-  }
+
+const rule = {
+  username: {required: true, message: '请输入用户名', trigger:['blur', 'change']},
+  password: {required: true, message: '请输入密码', trigger: ['blur', 'change']}
+}
+
+// const login = ()=>{
+//   if(!form.username || !form.password){
+//    ElMessage.warning("请填写用户名和密码")
+//   }else {
+//     post("/api/auth/login",{
+//       username: form.username,
+//       password: form.password,
+//       remember: form.remember,
+//     }, (message)=>{
+//         ElMessage.success(message)
+//         router.push('/index')
+//     }, (message)=>{
+//       ElMessage.error(message)
+//     })
+//   }
+// }
+
+const formRef = ref()
+
+function userLogin(){
+  formRef.value.validate((isValid)=>{
+    if(!isValid){
+      ElMessage.warning('请完整填写信息')
+    }else {
+      login(form.username, form.password, form.remember, ()=>{})
+    }
+  })
 }
 </script>
 
@@ -38,7 +56,7 @@ const login = ()=>{
       </div>
     </div>
     <div style="margin-top: 20px">
-      <el-form style="margin: 20px;" :model="form">
+      <el-form style="margin: 20px;" :model="form" ref="formRef" :rules="rule">
         <el-form-item prop="username">
           <el-input placeholder="用户名" :prefix-icon="User" v-model="form.username"></el-input>
         </el-form-item>
@@ -55,7 +73,7 @@ const login = ()=>{
             <el-link @click="router.push('/forget')">忘记密码？</el-link>
           </el-col>
         </el-row>
-        <el-button plain type="success" style="width: 190px;" @click="router.push('/index')" >立即登陆</el-button>
+        <el-button plain type="success" style="width: 190px;" @click="userLogin()" >立即登陆</el-button>
       </div>
     </div>
     <div>
