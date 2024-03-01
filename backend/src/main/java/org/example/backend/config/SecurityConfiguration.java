@@ -48,12 +48,13 @@ public class SecurityConfiguration {
 
     @Resource
     JwtAuthorizeFilter jwtAuthorizeFilter;
+
     @Bean
-    SecurityFilterChain filterChain(HttpSecurity security) throws Exception {
+    SecurityFilterChain securityFilterChain(HttpSecurity security) throws Exception {
         return security
                 //验证
                 .authorizeHttpRequests(conf ->{
-                    conf.requestMatchers("/api/auth/**").permitAll();
+                    conf.requestMatchers("/api/auth/**", "/error").permitAll();
                     conf.anyRequest().authenticated();
                 })
                 //登录
@@ -70,19 +71,19 @@ public class SecurityConfiguration {
                 //csrf
                 .csrf(AbstractHttpConfigurer::disable)
                 //跨域
-                .cors(conf->{
-                    //新建corsConfiguration
-                    CorsConfiguration configuration = new CorsConfiguration();
-                    configuration.addAllowedOrigin("http://localhost:5173");
-                    configuration.addAllowedMethod("*");
-                    configuration.addAllowedHeader("*");
-                    configuration.addExposedHeader("*");
-                    configuration.setAllowCredentials(false);//发送cookie
-                    //创建source
-                    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-                    source.registerCorsConfiguration("/**", configuration);
-                    conf.configurationSource(source);
-                })
+//                .cors(conf->{
+//                    //新建corsConfiguration
+//                    CorsConfiguration configuration = new CorsConfiguration();
+//                    configuration.addAllowedOrigin("http://localhost:5173");
+//                    configuration.addAllowedMethod("*");
+//                    configuration.addAllowedHeader("*");
+//                    configuration.addExposedHeader("*");
+//                    configuration.setAllowCredentials(false);//发送cookie
+//                    //创建source
+//                    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+//                    source.registerCorsConfiguration("/**", configuration);
+//                    conf.configurationSource(source);
+//                })
                 //无状态
                 .sessionManagement(conf->conf.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 //添加过滤器

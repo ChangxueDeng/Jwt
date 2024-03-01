@@ -35,6 +35,9 @@ public class ResultBean<T> {
     public static <T> ResultBean<T> failure(int code, T data, String message){
         return new ResultBean<T>(code, data, message, false);
     }
+    public static <T> ResultBean<T> success(){
+        return new ResultBean<T>(200,null,null,true);
+    }
     public static <T> ResultBean<T> failure(int code, String message){
         return new ResultBean<T>(code, null, message,false);
     }

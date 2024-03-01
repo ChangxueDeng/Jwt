@@ -1,5 +1,6 @@
 import axios from "axios";
 import {ElMessage} from "element-plus";
+import router from "@/router/index.js";
 
 const defaultError = (error)=>{
     console.error(error)
@@ -34,8 +35,8 @@ function internalGet(url, header, success, failure, error = defaultError){
     axios.get(url, {
         headers: header
     }).then(({data})=>{
-        if(data.code === 200){
-            success(data.data)
+        if(data.success === true){
+            success(data.message)
         }else{
             failure(data.message, data.code, url)
         }
@@ -56,6 +57,13 @@ function takeAccessToken(){
     return authObj.token
 }
 
+//请求头携带token
+function accessHeader(){
+    const token = takeAccessToken()
+    if(token)
+        return `Bearer ${takeAccessToken()}`
+    return null
+}
 
 
 
@@ -76,32 +84,50 @@ function deleteAccessToken(){
     sessionStorage.removeItem(authItemName)
 }
 
-function post(url, data,success, failure = defaultFailure, error = defaultError){
-    axios.post(url, {
-        headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-        }
-    }).then(({data})=>{
-        if (data.success){
-            success(data.message, data.status)
-        }else {
-            failure(data.message, data.status)
-        }
-    }).catch(error)
+//外部post
+
+function post(url ,data, success, failure = defaultFailure){
+    internalPost(url, data, {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Authorization" : accessHeader()
+    }, success, failure)
 }
-function get(url, success, failure = defaultFailure, error = defaultError){
-    axios.get(url, {
-        headers: {
-            "Content-Type": "application/x-www-form-urlencoded"
-        }
-    }).then(({data})=>{
-        if (data.success){
-            success(data.message, data.status)
-        }else {
-            failure(data.message, data.status)
-        }
-    }).catch(error)
+// function post(url, data,success, failure = defaultFailure, error = defaultError){
+//     axios.post(url, {
+//         headers: {
+//             "Content-Type": "application/x-www-form-urlencoded",
+//         }
+//     }).then(({data})=>{
+//         if (data.success){
+//             success(data.message, data.status)
+//         }else {
+//             failure(data.message, data.status)
+//         }
+//     }).catch(error)
+// }
+//外部get
+
+function get(url, success, failure = defaultFailure){
+    internalGet(url, {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Authorization" : accessHeader()
+    }, success, failure)
 }
+
+// function get(url, success, failure = defaultFailure, error = defaultError){
+//     axios.get(url, {
+//         headers: {
+//             "Content-Type": "application/x-www-form-urlencoded"
+//         }
+//     }).then(({data})=>{
+//         if (data.success){
+//             success(data.message, data.status)
+//         }else {
+//             failure(data.message, data.status)
+//         }
+//     }).catch(error)
+// }
+
 
 function login(username, password, remember, success, failure = defaultFailure){
     internalPost('api/auth/login', {
@@ -111,12 +137,23 @@ function login(username, password, remember, success, failure = defaultFailure){
     }, {
         "Content-Type": "application/x-www-form-urlencoded"
     }, (data)=>{
-        storeAccessToken(remember, data.token, data.expire)
-        ElMessage.success(`登陆成功，欢迎 ${data.username} 登陆系统`)
-        success(data)
+        storeAccessToken(data.token, remember, data.expire)
+        ElMessage.success(`登陆成功, 欢迎 ${data.username}`)
+        // success(data)
+        router.push("/index")
     }, failure)
 
 }
 
+function logout(success, failure){
+    get('api/auth/logout',(message)=>{
+        deleteAccessToken()
+        ElMessage.success(message)
+        success()
+    }, failure)
+}
 
-export {post, get, login}
+function unAuthorized(){
+    return !takeAccessToken()
+}
+export {post, get, login, logout, unAuthorized}

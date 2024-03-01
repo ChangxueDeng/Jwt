@@ -9,4 +9,7 @@ import org.springframework.stereotype.Service;
 
 public interface AccountService extends IService<Account> , UserDetailsService {
     Account findAccountByUsernameOrEmail(String text);
+
+    //注册邮件验证码
+    String registerEmailVerifyCode(String type, String email, String ip);
 }
