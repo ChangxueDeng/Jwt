@@ -38,7 +38,7 @@ const rules = {
   username:[{validator: usernameValidate, trigger:['blur', 'change']},
     {min:3, max:6, message: '用户名为3到6个字符长度', trigger: ['blur', 'change']}],
   password:[{required: true, message:'请输入密码', trigger:['blur','change']},
-    {min:8, message: '密码长度应大于8个字符', trigger: ['blur', 'change']}],
+    {min:6, message: '密码长度应大于6个字符', trigger: ['blur', 'change']}],
   passwd_repeat:[{validator: passwd_repeatValidate, trigger:['blur', 'change']}],
   email:[{required: true, message: '请输入电子邮箱', trigger:['blur', 'change']},
     {type: 'email', message: '请输入合法的邮件地址', trigger: ['blur','change']}],
@@ -111,10 +111,10 @@ const validateEmail = ()=>{
         <el-input placeholder="用户名" :prefix-icon="User" type="text" v-model="form.username" maxlength="6"></el-input>
       </el-form-item>
       <el-form-item prop="password">
-        <el-input placeholder="密码" :prefix-icon="Lock" type="password" v-model="form.password" minlength="8"></el-input>
+        <el-input placeholder="密码" :prefix-icon="Lock" type="password" v-model="form.password" minlength="6"></el-input>
       </el-form-item>
       <el-form-item prop="passwd_repeat">
-        <el-input placeholder="确认密码" :prefix-icon="Lock" type="password" v-model="form.passwd_repeat" minlength="8"></el-input>
+        <el-input placeholder="确认密码" :prefix-icon="Lock" type="password" v-model="form.passwd_repeat" minlength="6"></el-input>
       </el-form-item>
       <el-form-item prop="email">
         <el-input placeholder="电子邮箱" :prefix-icon="Message" type="text" v-model="form.email"></el-input>
