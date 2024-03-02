@@ -54,7 +54,7 @@ public class SecurityConfiguration {
         return security
                 //验证
                 .authorizeHttpRequests(conf ->{
-                    conf.requestMatchers("/api/auth/**", "/error").permitAll();
+                    conf.requestMatchers("/api/auth/**", "/error", "api/test/**").permitAll();
                     conf.anyRequest().authenticated();
                 })
                 //登录
