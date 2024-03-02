@@ -19,7 +19,7 @@ const defaultFailure = (message, code, url)=>{
 
 //内部
 function internalPost(url, data, header, success, failure, error = defaultError){
-    axios.post(url, data, {
+    axios.post(url, data,{
         headers: header
     }).then(({data}) =>{
         if(data.success){
@@ -31,8 +31,8 @@ function internalPost(url, data, header, success, failure, error = defaultError)
 }
 
 //内部使用get
-function internalGet(url, header, success, failure, error = defaultError){
-    axios.get(url, {
+function internalGet(url,header, success, failure, error = defaultError){
+    axios.get(url,{
         headers: header
     }).then(({data})=>{
         if(data.success === true){
@@ -86,8 +86,8 @@ function deleteAccessToken(){
 
 //外部post
 
-function post(url ,data, success, failure = defaultFailure){
-    internalPost(url, data, {
+function post(url , data, success, failure = defaultFailure){
+    internalPost(url, data,{
         "Content-Type": "application/x-www-form-urlencoded",
         "Authorization" : accessHeader()
     }, success, failure)
@@ -134,26 +134,44 @@ function login(username, password, remember, success, failure = defaultFailure){
         username: username,
         password: password,
         remember: remember,
-    }, {
-        "Content-Type": "application/x-www-form-urlencoded"
-    }, (data)=>{
+    },{"Content-type":"application/x-www-form-urlencoded"}, (data)=>{
         storeAccessToken(data.token, remember, data.expire)
         ElMessage.success(`登陆成功, 欢迎 ${data.username}`)
         // success(data)
         router.push("/index")
     }, failure)
-
 }
 
 function logout(success, failure){
-    get('api/auth/logout',(message)=>{
+    get('api/auth/logout' ,(message)=>{
         deleteAccessToken()
         ElMessage.success(message)
         success()
     }, failure)
 }
 
+function register(data, success, failure){
+    internalPost('api/auth/register',{
+        username: data.username,
+        password: data.password,
+        email: data.email,
+        code: data.email_code
+    },{"Content-type":"application/json"},success,failure)
+}
+function resetConfirm(data, success, failure){
+    internalPost('api/auth/reset-confirm',{
+        email: data.email,
+        code: data.email_code
+    },{"Content-type":"application/json"},success,failure)
+}
+function resetPassword(data, success, failure){
+    internalPost('api/auth/reset-password',{
+        email: data.email,
+        code: data.email_code,
+        password: data.password
+    },{"Content-type":"application/json"},success,failure)
+}
 function unAuthorized(){
     return !takeAccessToken()
 }
-export {post, get, login, logout, unAuthorized}
+export {post, get, login, logout, unAuthorized, register, resetConfirm, resetPassword}

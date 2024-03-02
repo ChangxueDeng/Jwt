@@ -4,7 +4,7 @@ import {Message, User,Lock} from "@element-plus/icons-vue";
 import router from "@/router/index.js";
 import {reactive, ref} from "vue";
 import {ElMessage} from "element-plus";
-import {post} from "@/net/index.js";
+import {register, post} from "@/net/index.js";
 //form
 const form = reactive({
   username: '',
@@ -61,19 +61,15 @@ const coldTime = ref(0)
 //表单完整填写检验
 const formRef = ref()
 
-const register = ()=>{
+const userRegister = ()=>{
   formRef.value.validate((isValid)=>{
     if(!isValid){
       ElMessage.warning('请完整填写信息')
     }else{
       //进行注册
-      post('api/auth/register', {
-        username: form.username,
-        password: form.password,
-        email: form.email,
-        email_code: form.email_code
-      }, (message)=>{
-          ElMessage.success(message)
+      register(form, ()=>{
+        ElMessage.success('注册成功')
+        router.push('/')
       }, (message)=>{
         ElMessage.warning(message)
       })
@@ -82,18 +78,34 @@ const register = ()=>{
 }
 
 //验证邮箱,并发送邮件
+
 const validateEmail = ()=>{
-  coldTime.value = 60; //限制频繁发送
-  post('api/auth/register-email',{
-    email: form.email
-  },(message)=>{
-    ElMessage.success(message)
-    setInterval(()=>coldTime.value = coldTime.value - 1, 1000)
+  coldTime.value = 60;
+  post('api/auth/ask-code',{
+    email: form.email,
+    type: 'register'
+  }, ()=>{
+    ElMessage.success('发送验证码成功，请注意查收')
+    setInterval(()=> coldTime.value--, 1000)
   }, (message)=>{
     ElMessage.warning(message)
-    coldTime.value = 0
+    coldTime.value = 0;
   })
 }
+
+
+// const validateEmail = ()=>{
+//   coldTime.value = 60; //限制频繁发送
+//   post('',{
+//     email: form.email
+//   },(message)=>{
+//     ElMessage.success(message)
+//     setInterval(()=>coldTime.value = coldTime.value - 1, 1000)
+//   }, (message)=>{
+//     ElMessage.warning(message)
+//     coldTime.value = 0
+//   })
+// }
 
 </script>
 
@@ -133,7 +145,7 @@ const validateEmail = ()=>{
     </el-form>
   </div>
   <div style="margin-top: 30px; text-align: center">
-    <el-button plain type="success" style="width: 150px;" @click="register()">立即注册</el-button>
+    <el-button plain type="success" style="width: 150px;" @click="userRegister">立即注册</el-button>
     <el-divider>
       <el-link @click="router.push('/')">已有账户，返回登陆</el-link>
     </el-divider>

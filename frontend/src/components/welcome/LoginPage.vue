@@ -3,7 +3,7 @@
 import {Link, Lock, User} from "@element-plus/icons-vue";
 import router from "@/router/index.js";
 import {reactive, ref} from "vue";
-import {login, post} from "@/net/index.js";
+import {login} from "@/net/index.js";
 import  {ElMessage} from "element-plus";
 
 const form = reactive({

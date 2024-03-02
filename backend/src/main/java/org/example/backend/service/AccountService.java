@@ -2,11 +2,10 @@ package org.example.backend.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.example.backend.entity.dto.Account;
+import org.example.backend.entity.vo.request.ConfirmResetVO;
 import org.example.backend.entity.vo.request.EmailRegisterVO;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.example.backend.entity.vo.request.PasswordResetVO;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.stereotype.Service;
 
 public interface AccountService extends IService<Account> , UserDetailsService {
     Account findAccountByUsernameOrEmail(String text);
@@ -15,4 +14,6 @@ public interface AccountService extends IService<Account> , UserDetailsService {
     String registerEmailVerifyCode(String type, String email, String ip);
     //注册
     String registerEmailAccount(EmailRegisterVO emailRegisterVO);
+    String resetConfirm(ConfirmResetVO confirmResetVO);
+    String resetEmailPassword(PasswordResetVO passwordResetVO);
 }
